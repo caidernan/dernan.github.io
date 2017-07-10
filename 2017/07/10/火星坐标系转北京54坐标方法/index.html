@@ -1,0 +1,1018 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="GIS," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="dernan's Thinker House" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="需求分析由于施肥博士App研发，需要将App上的高德坐标系的点坐标与底图上的北京54平面坐标系的点坐标进行叠加重合。这个问题纠结了一年，最近有新的发现与方法，故在此写一篇技术贴总结记录。要实现如下功能，通过当前所在定位坐标，获得当前位置的土壤养分数据。​1234App-&amp;gt;Server:发送高德坐标系参数请求土壤养分信息Note right of Server: 坐标转换，高德—&amp;gt;WGS">
+<meta name="keywords" content="GIS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="火星坐标系转北京54坐标方法">
+<meta property="og:url" content="http://blog.dernan.com/2017/07/10/火星坐标系转北京54坐标方法/index.html">
+<meta property="og:site_name" content="dernan's Thinker House">
+<meta property="og:description" content="需求分析由于施肥博士App研发，需要将App上的高德坐标系的点坐标与底图上的北京54平面坐标系的点坐标进行叠加重合。这个问题纠结了一年，最近有新的发现与方法，故在此写一篇技术贴总结记录。要实现如下功能，通过当前所在定位坐标，获得当前位置的土壤养分数据。​1234App-&amp;gt;Server:发送高德坐标系参数请求土壤养分信息Note right of Server: 坐标转换，高德—&amp;gt;WGS">
+<meta property="og:image" content="http://1824.img.pp.sohu.com.cn/images/blog/2010/1/22/11/24/12704e49691g213.jpg">
+<meta property="og:image" content="http://img.blog.csdn.net/20160529153517795">
+<meta property="og:image" content="http://img.blog.csdn.net/20160529154328977">
+<meta property="og:image" content="http://img.blog.csdn.net/20160529154906876">
+<meta property="og:updated_time" content="2017-07-10T08:00:01.328Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="火星坐标系转北京54坐标方法">
+<meta name="twitter:description" content="需求分析由于施肥博士App研发，需要将App上的高德坐标系的点坐标与底图上的北京54平面坐标系的点坐标进行叠加重合。这个问题纠结了一年，最近有新的发现与方法，故在此写一篇技术贴总结记录。要实现如下功能，通过当前所在定位坐标，获得当前位置的土壤养分数据。​1234App-&amp;gt;Server:发送高德坐标系参数请求土壤养分信息Note right of Server: 坐标转换，高德—&amp;gt;WGS">
+<meta name="twitter:image" content="http://1824.img.pp.sohu.com.cn/images/blog/2010/1/22/11/24/12704e49691g213.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.dernan.com/2017/07/10/火星坐标系转北京54坐标方法/"/>
+
+
+
+
+
+  <title>火星坐标系转北京54坐标方法 | dernan's Thinker House</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5414af1a5cfbf329178771b206022ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">dernan's Thinker House</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">dernan的技术积累小窝</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://blog.dernan.com/2017/07/10/火星坐标系转北京54坐标方法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="dernan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dernan's Thinker House">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                火星坐标系转北京54坐标方法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-10T15:45:57+08:00">
+                2017-07-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/07/10/火星坐标系转北京54坐标方法/" class="leancloud_visitors" data-flag-title="火星坐标系转北京54坐标方法">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h1><p>由于施肥博士App研发，需要将App上的高德坐标系的点坐标与底图上的北京54平面坐标系的点坐标进行叠加重合。这个问题纠结了一年，最近有新的发现与方法，故在此写一篇技术贴总结记录。<br>要实现如下功能，通过当前所在定位坐标，获得当前位置的土壤养分数据。<br>​<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">App-&gt;Server:发送高德坐标系参数请求土壤养分信息</div><div class="line">Note right of Server: 坐标转换，高德—&gt;WGS84-&gt;北京54，点查询</div><div class="line">Server--&gt;App: 返回土壤养分信息</div><div class="line">​</div></pre></td></tr></table></figure></p>
+<h1 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h1><h2 id="1-各类坐标系"><a href="#1-各类坐标系" class="headerlink" title="1. 各类坐标系"></a>1. 各类坐标系</h2><hr>
+<h3 id="地球坐标-WGS84"><a href="#地球坐标-WGS84" class="headerlink" title=" 地球坐标(WGS84)"></a><strong> 地球坐标(WGS84)</strong></h3><ul>
+<li>大地坐标系，国际标准，从专业GPS设备中取出的数据的坐标系</li>
+<li>国际地图提供商使用的坐标系，如谷歌地图</li>
+</ul>
+<hr>
+<h3 id="火星坐标-GCJ-02-也叫国测局坐标系"><a href="#火星坐标-GCJ-02-也叫国测局坐标系" class="headerlink" title=" 火星坐标 (GCJ-02)也叫国测局坐标系"></a><strong> 火星坐标 (GCJ-02)也叫国测局坐标系</strong></h3><ul>
+<li>中国标准，从国行移动设备中定位获取的坐标数据使用这个坐标系</li>
+<li>国家规定： 国内出版的各种地图系统（包括电子形式），必须至少采用GCJ-02对地理位置进行首次加密。</li>
+<li>高德地图，可使用高德坐标转换API转换至高德地图坐标系，见<a href="http://lbs.amap.com/api/webservice/reference/convert/#t5" target="_blank" rel="external">链接</a><br>​<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">CoordinateConverter converter  = <span class="keyword">new</span> CoordinateConverter(); </div><div class="line"><span class="comment">// CoordType.GPS 待转换坐标类型</span></div><div class="line">converter.from(CoordType.GPS); </div><div class="line"><span class="comment">// sourceLatLng待转换坐标点 DPoint类型</span></div><div class="line">converter.coord(sourceLatLng); </div><div class="line"><span class="comment">// 执行转换操作</span></div><div class="line">DPoint desLatLng = converter.convert();</div><div class="line">​</div></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3 id="百度坐标-BD-09"><a href="#百度坐标-BD-09" class="headerlink" title=" 百度坐标 (BD-09)"></a><strong> 百度坐标 (BD-09)</strong></h3><ul>
+<li>百度标准，百度 SDK，百度地图，Geocoding 使用</li>
+<li>可使用百度地图的Web服务API中的坐标转换API，将其他坐标系转换为百度坐标，见<a href="http://lbsyun.baidu.com/index.php?title=webapi/guide/changeposition" target="_blank" rel="external">链接</a></li>
+</ul>
+<hr>
+<h3 id="国标-CGCS2000"><a href="#国标-CGCS2000" class="headerlink" title=" 国标 CGCS2000"></a><strong> 国标 CGCS2000</strong></h3><ul>
+<li>CGCS2000（大地坐标系，国标2000，经纬直投），是我国通用的坐标系统，2008年7月1日后我国的测绘成果应当在该坐标系下表达。</li>
+<li><strong>天地图</strong>所使用</li>
+</ul>
+<hr>
+<h3 id="北京54平面坐标系"><a href="#北京54平面坐标系" class="headerlink" title=" 北京54平面坐标系"></a><strong> 北京54平面坐标系</strong></h3><ul>
+<li>北京54坐标系(BJZ54)，北京54坐标系为参心大地坐标系，大地上的一点可用经度L54、纬度M54和大地高H54定位，它是以<strong>克拉索夫斯基椭球</strong>为基础，经局部平差后产生的坐标系，其坐标详细定义可参见参考文献 [朱华统 1990]。</li>
+<li>椭球坐标参数：长半轴a=6378245m；短半轴=6356863.0188m；扁率α=1/298.3。</li>
+<li>其单位一般为米制单位。</li>
+</ul>
+<h2 id="2-高斯-克里格投影"><a href="#2-高斯-克里格投影" class="headerlink" title="2. 高斯-克里格投影"></a>2. 高斯-克里格投影</h2><p>通过查看原始地图数据（1:50000比例尺），发现广东省纵横跨幅很大，存在两个坐标系（其使用高斯-克吕格投影，<strong>6度分带划分</strong>），分别为Beijing 1954 GK Zone 19N（即108~114°）和Beijing 1954 GK Zone 20N（即114~120°范围）。</p>
+<blockquote>
+<p>高斯-克吕格(Gauss-Kruger)投影简称“高斯投影”，又名”等角横切椭圆柱投影”，地球椭球面和平面间正形投影的一种。德国数学家、物理学家、天文学家高斯（Carl FriedrichＧauss，1777一 1855）于十九世纪二十年代拟定，后经德国大地测量学家克吕格（Johannes Kruger，1857～1928）于 1912年对投影公式加以补充，故名。</p>
+<p>该投影按照投影带中央子午线投影为直线且长度不变和赤道投影为直线的条件，确定函数的形式，从而得到高斯一克吕格投影公式。投影后，除中央子午线和赤道为直线外， 其他子午线均为对称于中央子午线的曲线。设想用一个椭圆柱横切于椭球面上投影带的中央子午线，按上述投影条件，将中央子午线两侧一定经差范围内的椭球面正形投影于椭圆柱面。将椭圆柱面沿过南北极的母线剪开展平，即为高斯投影平面。取中央子午线与赤道交点的投影为原点，中央子午线的投影为纵坐标x轴，赤道的投影为横坐标y轴，构成高斯克吕格平面直角坐标系。</p>
+<p>高斯-克吕格投影在长度和面积上变形很小，中央经线无变形，自中央经线向投影带边缘，变形逐渐增加，变形最大之处在投影带内赤道的两端。由于其投影精度高，变形小，而且计算简便（各投影带坐标一致，只要算出一个带的数据，其他各带都能应用），因此在大比例尺地形图中应用，可以满足军事上各种需要，能在图上进行精确的量测计算。</p>
+</blockquote>
+<p><img src="http://1824.img.pp.sohu.com.cn/images/blog/2010/1/22/11/24/12704e49691g213.jpg" alt="高斯-克吕格投影分带"><br>​                                        </p>
+<blockquote>
+<p> 我国采用6度分带和3度分带：　</p>
+<p>  1∶2.5万及1∶5万的地形图采用6度分带投影，即经差为6度，从零度子午线开始，自西向东每个经差6度为一投影带，全球共分60个带，用1，2，3，4，5，……表示．即东经0～6度为第一带，其中央经线的经度为东经3度，东经6～12度为第二带，其中央经线的经度为9度。<br>   1∶1万的地形图采用3度分带，从东经1.5度的经线开始，每隔3度为一带，用1，2，3，……表示，全球共划分120个投影带，即东经1.5～ 4.5度为第1带，其中央经线的经度为东经3度，东经4.5～7.5度为第2带，其中央经线的经度为东经6度．我省位于东经113度－东经120度之间，跨第38、39、40共计3个带，其中东经115.5度以西为第38带，其中央经线为东经114度；东经115.5～118.5度为39带，其中央经线为东经117度；东经118.5度以东到山海关为40带，其中央经线为东经120度。地形图上公里网横坐标前2位就是带号，例如：1∶5万地形图上的横坐标为20345486，其中20即为带号，345486为横坐标值。</p>
+<p>   2．当地中央经线经度的计算六度带中央经线经度的计算：当地中央经线经度＝６°×当地带号－３°，例如：地形图上的横坐标为２０３４５，其所处的六度带的中央经线经度为：６°×２０－３°＝１１７°（适用于１∶２．５万和１∶５万地形图）。三度带中央经线经度的计算：中央经线经度＝３°×当地带号（适用于１∶１万地形图）。</p>
+</blockquote>
+<h2 id="3-转换方法"><a href="#3-转换方法" class="headerlink" title="3. 转换方法"></a>3. 转换方法</h2><p>近文献检索等查找，常用的WGS84转北京54坐标系的方式有<strong>七参数转换法、三参数转换法</strong>。也有实现该算法的软件，而本系统需要实现自动化处理，即要自己写算法或者调用类库或接口。在这其中最麻烦的是，如何得知这三个参数或者七个参数，需要采集两个不同坐标系下面的对应点坐标集合（一般至少五个），并运用一定的算法，获得这些参数。这些参数算好之后，带入获得转换参数。因此，最麻烦的部分，我一直没法解决。广东省范围涉及面大，验证成本高。在无法确定一个县求得参数是否符合另一个地方。</p>
+<blockquote>
+<p>1、把从GPS中接收到84坐标系下的大地坐标（经纬度高程B、L, H，其中B为纬度，L为经度，H为高程），使用84坐标系的椭球参数转换为84坐标系下的地心直角坐标（空间坐标）：</p>
+<p>X=(N+H)cosB * CosL </p>
+<p>Y=(N+H)cosB* sinL </p>
+<p>Z=[N(1-e2)+H]* sinB</p>
+<p>其中N为法线长度，计算公式为N=a/sqrt(l—e2*sin2B)，a为椭球体长轴半径，e为第一偏心率。</p>
+<p>WGS84坐标系地球参数为：</p>
+<p>椭圆长半径a: 6378137.00</p>
+<p>第一偏心率e2:  0.006 694 379 901 3</p>
+<p>2、使用七参数转换为54坐标系下的地心直角坐标：</p>
+<pre><code>X = △X + k*x - β*z + γ*y + x
+
+Y = △Y + k*y + α*z - γ*x + y
+
+Z = △Z + k*z - α*y + β*x + z
+</code></pre><p>其中，</p>
+<p>△X  △Y  △Z——三个坐标方向的平移参数；</p>
+<p>α β γ——三个方向的旋转角参数</p>
+<p>k——尺度参数<br>在小范围内可使用七参数的特殊形式即三参数，即k、α、β、γ都等于0，变成：<br>   X = △X + x<br>  Y = △Y + y<br>   Z = △Z + z</p>
+<p>3、使用54坐标系的椭球参数转换为54坐标系下的大地坐标(B, L, H):<br>      L=arctan(Y/X)</p>
+<p>但大地纬度B的计算比较复杂，通常采用迭代法：<br>上式右端有待定量B ,需迭代计算，迭代时可取<br>用B的初值B1计算N1和sin B1，将上式进行第二次迭代直至最后两次B 值之差小于允许误差为止。<br>计算出了B值，大地高也可得出：</p>
+<p>北京54坐标系地球参数为：<br>椭圆长半径a: 6378245.0<br>第一偏心率e2:  0.006 693 421 622 965 949</p>
+</blockquote>
+<h1 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h1><p>基本原理说完了，开始说正事啦<del>~</del>(&gt;_&lt;)~~~~</p>
+<h2 id="1-前提条件"><a href="#1-前提条件" class="headerlink" title="1. 前提条件"></a>1. 前提条件</h2><p>后来，经提醒查看了原始数据，采样点数据部分是有经纬度的属性值记录，而其图层投影坐标系正是北京54坐标系。那么条件充足，就差实现了。</p>
+<ul>
+<li>采样点数据，既有WGS84的经纬度坐标属性数据集合和对应的北京54坐标系空间数据</li>
+<li>ArcGIS提供了WGS84和北京54坐标系之间的互转方法</li>
+<li>网上已有大神提供百度坐标系、百度坐标系和WGS84坐标系转换的算法库</li>
+</ul>
+<h2 id="2-火星坐标系转WGS84坐标系"><a href="#2-火星坐标系转WGS84坐标系" class="headerlink" title="2. 火星坐标系转WGS84坐标系"></a>2. 火星坐标系转WGS84坐标系</h2><p>使用wandergis大神的coordtransform 坐标转换（Python和js版本），由于后端技术栈是Java，其开源代码，本人将其转换为Java语言作为一个库进行使用。</p>
+<h2 id="3-Arcgis投影、偏移量调整"><a href="#3-Arcgis投影、偏移量调整" class="headerlink" title="3. Arcgis投影、偏移量调整"></a>3. Arcgis投影、偏移量调整</h2><p>受到《ArcGIS中将WGS84坐标转换为北京54或者西安80坐标系（供讨论）》的启发，在ArcMap 10.2软件中已提供坐标系转换支持，可在toolbox工具箱中找到投影工具：<br>Arctoolboxs-&gt;Data management tools-&gt;Projections and Transformations-&gt;Feature-&gt;Project</p>
+<p><img src="http://img.blog.csdn.net/20160529153517795" alt="投影"></p>
+<blockquote>
+<p>Beijing_1954_To_WGS_1984_1 15918 China - Orduz basin（适用鄂尔多斯盆地）<br>Beijing_1954_To_WGS_1984_2 15919 China - offshore Yellow Sea （黄海地区）<br>Beijing_1954_To_WGS_1984_3 15920 China - offshore South China Sea - Pearl River basin （南海及珠江盆地）<br>Beijing_1954_To_WGS_1984_4 15921 China - south and west Tarim basin （西南塔里木盆地）<br>Beijing_1954_To_WGS_1984_5 15935 China - south and west Tarim basin 西南塔里木盆地）<br>Beijing_1954_To_WGS_1984_6 15936 China - Orduz basin （鄂尔多斯盆地）</p>
+</blockquote>
+<p><img src="http://img.blog.csdn.net/20160529154328977" alt="这里写图片描述"></p>
+<p>取采样点数据，经过两者坐标系的集合及转换后对比，与底图数据有大概一定的数据位移。取转换后的坐标值与实际值，以X、Y值差值作为偏移量。</p>
+<h2 id="4-Arcgis-Server-API的投影接口调用"><a href="#4-Arcgis-Server-API的投影接口调用" class="headerlink" title="4. Arcgis Server API的投影接口调用"></a>4. Arcgis Server API的投影接口调用</h2><p>ArcMap有的功能，ArcGIS Server自然也是会有的。基于RESTful原则的ArcGIS接口，实现投影参数的返回。</p>
+<p>地址如下：</p>
+<p><a href="http://[gisServer-host]/arcgis/rest/services/Utilities/Geometry/GeometryServer/project" target="_blank" rel="external">http://[gisServer-host]/arcgis/rest/services/Utilities/Geometry/GeometryServer/project</a></p>
+<p><img src="http://img.blog.csdn.net/20160529154906876" alt="投影接口"></p>
+<p><strong>要点：可查询ArcGIS REST API 的help文档。</strong></p>
+<p>Input Spatial Reference： </p>
+<blockquote>
+<p>4326（WGS84 wkid的编号）</p>
+</blockquote>
+<p>Output Spatial Reference: </p>
+<blockquote>
+<p>21479  //19N坐标系<br>21480  //20N坐标系</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> JSONObject <span class="title">projectWGSToBj</span><span class="params">(<span class="keyword">double</span> x, <span class="keyword">double</span> y,<span class="keyword">int</span> outSR)</span> </span>&#123;</div><div class="line">   <span class="comment">//寻找GP地址</span></div><div class="line">    String GPPath =</div><div class="line">            CommonConstants.GISSERVER_PATH + <span class="string">"/arcgis/rest/services/Utilities/Geometry/GeometryServer/project"</span>;</div><div class="line"></div><div class="line">    GPPath += <span class="string">"?"</span> +</div><div class="line">            <span class="string">"inSR=4326"</span> +</div><div class="line">            <span class="string">"&amp;outSR="</span> +outSR+</div><div class="line">           <span class="string">"&amp;geometries=%7B%0D%0A++%22geometryType%22+%3A+%22esriGeometryPoint%22%2C%0D%0A++%22geometries%22+%3A%5B%7B%22x%22+%3A+"</span> + x + <span class="string">"%2C+%22y%22+%3A"</span> + y</div><div class="line">            + <span class="string">"%7D%5D%0D%0A%7D&amp;transformation=15920&amp;transformForward=false&amp;f=pjson"</span>;</div><div class="line"></div><div class="line">    JSONObject result = HttpRequestUtil.getUrlConnection(GPPath, <span class="string">""</span>, RequestMethod.GET);</div><div class="line">    <span class="keyword">return</span> result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p> 即实现WGS84坐标转北京54的投影。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>方法总比困难多，还是要办法解决问题的，还是要根据业务来走，业务带动技术。<br>最终我要实现的功能流程如下：</p>
+<ol>
+<li>App获得高德地图坐标系下的经纬度，请求参数给服务器；</li>
+<li>服务器解析Json数据，将高德地图坐标的点经纬度经过算法处理成WGS84坐标系下的点坐标；</li>
+<li>WGS84坐标系下的点坐标经ArcGIS REST API调用投影处理成北京54坐标系；</li>
+<li>处理偏移问题，进行identify查询，获取土壤养分数据，返回App；</li>
+<li>App获得数据，显示到用户界面。</li>
+</ol>
+<p>参考文献：</p>
+<ol>
+<li><a href="http://www.cnblogs.com/Tangf/archive/2012/03/15/2398397.html" target="_blank" rel="external">国内外各地图API坐标系比较</a></li>
+<li><a href="http://cnodejs.org/topic/564c0a27e4766d487f6fe38d" target="_blank" rel="external">百度坐标（BD09）、国测局坐标（火星坐标，GCJ02）、和WGS84坐标系互转</a></li>
+<li><a href="http://tian0226.blog.sohu.com/142843049.html" target="_blank" rel="external">墨卡托投影、高斯-克吕格投影、UTM投影及我国分带方法</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_94da0b5b0101gxn3.html" target="_blank" rel="external">ArcGIS中的北京54和西安80投影坐标系详解</a></li>
+<li><a href="http://blog.csdn.net/breaker892902/article/details/9069609" target="_blank" rel="external">WGS84 与 北京54 坐标系互转</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_5238a0c20102uwj9.html" target="_blank" rel="external">ArcGIS中将WGS84坐标转换为北京54或者西安80坐标系（供讨论）</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_a9091a330101aeal.html" target="_blank" rel="external">使用ArcGIS实现WGS84经纬度坐标到北京54高斯投影坐标的转换 </a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>如果觉得写的不错，那就打赏一下吧！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/weixin.jpg" alt="dernan WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/GIS/" rel="tag"># GIS</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/10/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="dernan" />
+          <p class="site-author-name" itemprop="name">dernan</p>
+           
+              <p class="site-description motion-element" itemprop="description">大概就是一个喜欢折腾的人吧</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="http://git.oschina.net/dernan" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/686eb0a5c677" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#需求分析"><span class="nav-number">1.</span> <span class="nav-text">需求分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本原理"><span class="nav-number">2.</span> <span class="nav-text">基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-各类坐标系"><span class="nav-number">2.1.</span> <span class="nav-text">1. 各类坐标系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#地球坐标-WGS84"><span class="nav-number">2.1.1.</span> <span class="nav-text"> 地球坐标(WGS84)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#火星坐标-GCJ-02-也叫国测局坐标系"><span class="nav-number">2.1.2.</span> <span class="nav-text"> 火星坐标 (GCJ-02)也叫国测局坐标系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#百度坐标-BD-09"><span class="nav-number">2.1.3.</span> <span class="nav-text"> 百度坐标 (BD-09)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#国标-CGCS2000"><span class="nav-number">2.1.4.</span> <span class="nav-text"> 国标 CGCS2000</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#北京54平面坐标系"><span class="nav-number">2.1.5.</span> <span class="nav-text"> 北京54平面坐标系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-高斯-克里格投影"><span class="nav-number">2.2.</span> <span class="nav-text">2. 高斯-克里格投影</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-转换方法"><span class="nav-number">2.3.</span> <span class="nav-text">3. 转换方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现方法"><span class="nav-number">3.</span> <span class="nav-text">实现方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-前提条件"><span class="nav-number">3.1.</span> <span class="nav-text">1. 前提条件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-火星坐标系转WGS84坐标系"><span class="nav-number">3.2.</span> <span class="nav-text">2. 火星坐标系转WGS84坐标系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Arcgis投影、偏移量调整"><span class="nav-number">3.3.</span> <span class="nav-text">3. Arcgis投影、偏移量调整</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Arcgis-Server-API的投影接口调用"><span class="nav-number">3.4.</span> <span class="nav-text">4. Arcgis Server API的投影接口调用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">dernan</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>访问人数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138419"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("gja7M2WdXuwFCDtoPWR9825j-gzGzoHsz", "7sbjjKXTr7PzCKam88FCSogm");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
