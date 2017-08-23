@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="GIS," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -93,7 +93,7 @@
 
 
 <meta name="description" content="需求分析由于施肥博士App研发，需要将App上的高德坐标系的点坐标与底图上的北京54平面坐标系的点坐标进行叠加重合。这个问题纠结了一年，最近有新的发现与方法，故在此写一篇技术贴总结记录。要实现如下功能，通过当前所在定位坐标，获得当前位置的土壤养分数据。​1234App-&amp;gt;Server:发送高德坐标系参数请求土壤养分信息Note right of Server: 坐标转换，高德—&amp;gt;WGS">
-<meta name="keywords" content="GIS">
+<meta name="keywords">
 <meta property="og:type" content="article">
 <meta property="og:title" content="火星坐标系转北京54坐标方法">
 <meta property="og:url" content="http://blog.dernan.com/2017/07/10/火星坐标系转北京54坐标方法/index.html">
@@ -103,7 +103,7 @@
 <meta property="og:image" content="http://img.blog.csdn.net/20160529153517795">
 <meta property="og:image" content="http://img.blog.csdn.net/20160529154328977">
 <meta property="og:image" content="http://img.blog.csdn.net/20160529154906876">
-<meta property="og:updated_time" content="2017-07-10T08:00:01.328Z">
+<meta property="og:updated_time" content="2017-08-23T15:26:37.275Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="火星坐标系转北京54坐标方法">
 <meta name="twitter:description" content="需求分析由于施肥博士App研发，需要将App上的高德坐标系的点坐标与底图上的北京54平面坐标系的点坐标进行叠加重合。这个问题纠结了一年，最近有新的发现与方法，故在此写一篇技术贴总结记录。要实现如下功能，通过当前所在定位坐标，获得当前位置的土壤养分数据。​1234App-&amp;gt;Server:发送高德坐标系参数请求土壤养分信息Note right of Server: 坐标转换，高德—&amp;gt;WGS">
@@ -337,6 +337,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/GIS/" itemprop="url" rel="index">
+                    <span itemprop="name">GIS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -527,17 +549,27 @@ Z = △Z + k*z - α*y + β*x + z
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/GIS/" rel="tag"># GIS</a>
-          
-        </div>
-      
 
       
         
       
 
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/23/GeoServer从入门到入坑/" rel="next" title="GeoServer从入门到入坑">
+                <i class="fa fa-chevron-left"></i> GeoServer从入门到入坑
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
 
       
@@ -608,12 +640,21 @@ Z = △Z + k*z - α*y + β*x + z
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
           
 
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
           
 
           
@@ -621,7 +662,7 @@ Z = △Z + k*z - α*y + β*x + z
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
